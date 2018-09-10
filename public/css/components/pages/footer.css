@@ -1,0 +1,21 @@
+footer {
+    background-color: #373737 !important;
+    padding-top: 5px;
+    color: #fff;
+}
+
+footer a {
+    text-decoration: none;
+    color: #fff;
+}
+
+footer a:hover {
+    color: #478dd2;
+    text-decoration: none;
+}
+
+@media (max-width: 992px) {}
+
+@media (max-width: 768px) {}
+
+@media (max-width: 576px) {}

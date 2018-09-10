@@ -1,0 +1,28 @@
+/* CORE CSS Library */
+
+@import url('components/lib/animate.min.css');
+@import url('components/lib/offcanvas.css');
+@import url('components/lib/toastr.min.css');
+
+/* Global Styles */
+
+@import url('components/global.css');
+
+/* Pages Custom CSS */
+
+@import url('components/pages/home.css');
+@import url('components/pages/about.css');
+@import url('components/pages/services.css');
+@import url('components/pages/team.css');
+@import url('components/pages/contact.css');
+@import url('components/pages/footer.css');
+@import url('components/pages/login.css');
+@import url('components/pages/register.css');
+
+/* Company Dashboard */
+
+@import url('components/company/dashboard.css');
+
+/* Manager Dashboard */
+
+@import url('components/custom.css');

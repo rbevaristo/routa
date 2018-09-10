@@ -1,0 +1,27 @@
+#register {
+    height: 90vh;
+}
+
+#register .card {
+    box-shadow: 10px 10px 15px rgba(73, 78, 92, 0.1);
+    background: #fff;
+    transition: 0.4s;
+}
+
+#register .card .card-header {
+    background-color: #fff;
+}
+
+#register .card .card-header span {
+    color: #478dd2 !important;
+}
+
+@media (max-width: 992px) {}
+
+@media (max-width: 768px) {}
+
+@media (max-width: 576px) {
+    #register {
+        height: 120vh;
+    }
+}

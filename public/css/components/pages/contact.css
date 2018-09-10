@@ -1,0 +1,12 @@
+#contact {
+    background-color: #efefef;
+    padding-top: 50px;
+}
+
+#contact .box {
+    padding: 40px;
+    margin-bottom: 40px;
+    box-shadow: 10px 10px 15px rgba(73, 78, 92, 0.1);
+    background: #fff;
+    transition: 0.4s;
+}
