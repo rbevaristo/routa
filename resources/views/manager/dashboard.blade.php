@@ -198,7 +198,7 @@
         @if(session('success'))
             <div class="alert alert-success notice notice-success notice-sm" role="alert">
                 <strong><span class="fa fa-check"></span></strong>{{ session('success') }}
-                Click <a href="{{ asset('storage/pdf/') }}/{{ App\EvaluationFile::where('user_id', auth()->user()->id)->latest('id')->first()->filename }}" target="_blank"> here </a> to view file.
+                Click <a href="{{ asset('storage/pdf/') }}/{{ App\EvaluationFile::where('manager_id', auth()->user()->id)->latest('id')->first()->filename }}" target="_blank"> here </a> to view file.
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                     <span aria-hidden="true">
                         <i class="fa fa-window-close"></i>
@@ -319,9 +319,11 @@
                         <!--<p id ="roleLabel1"><strong>Cook</strong></p>-->
                         <div id="roleContainer">
                             <button id ="roleLeft">&#171;</button>
-                            <p id = "roleViewLabel">Cook</p>
+                            <p id = "roleViewLabel">Position</p>
                             <button id ="roleRight">&#187;</button>
                         </div>
+                        <button id="saveBtn" class = "managerBtn1" style="display:inline-block !important;float:none;margin-bottom:14px;">Save Schedule</button>
+                        <button id="printBtn" class = "managerBtn1" data-toggle="modal" data-target="#exampleModalCenter" style="display:inline-block !important;float:none;margin-bottom:14px;">Print PDF</button>                        
                         <div style="float:right;">
                             <span class="float-right dropdown">
                                 <a  id="scheduler-settings-icon"  href="#" class="text-white dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -329,7 +331,7 @@
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
                                     <a class="dropdown-item" href="{{ route('manager.settings') }}">Scheduler Settings</a>
-                                    {{-- <a class="dropdown-item" href="{{ route('user.schedule') }}">Scheduler Files</a> --}}
+                                    <a class="dropdown-item" href="{{ route('manager.schedule') }}">Scheduler Files</a>
                                 </div>
                             </span>
                         </div>
@@ -392,7 +394,7 @@
                             <div class="managerwindow" style="margin-top:20px;text-align:center !important;">
                                 <button id="empManagerBtn" class = "managerBtn1 ishidden">Manage Employees</button>
                                 <button id="roleManagerBtn" class = "managerBtn1 ishidden">Manage Roles</button>
-                                <button id="saveBtn" class = "managerBtn1" style="display:inline-block !important;float:none;margin-bottom:14px;">Save Schedule</button>
+                                {{-- <button id="saveBtn" class = "managerBtn1" style="display:inline-block !important;float:none;margin-bottom:14px;">Save Schedule</button> --}}
                             </div>
                         </div>
                     </div>
@@ -403,7 +405,40 @@
 </section>
 
 @include('components.modal')
-
+<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLongTitle">Scheduler Print To Pdf</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="alert alert-warning">To have a good pdf schedule please set dates with a range of 1 week.</div>
+            <form>
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text"><i class="fa fa-calendar-o"></i></div>
+                        </div>
+                        <input type="date" class="form-control" id="start">
+                        <div class="input-group-text">to</div>
+                        <input type="date" class="form-control" id="end">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text"><i class="fa fa-calendar-o"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" id="printToPdf" class="btn btn-primary">Print</button>
+        </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('scripts')
@@ -495,6 +530,44 @@
                     }
                 }
             });
+
+            $(".modal").on("hidden.bs.modal", function(){
+                location.reload();
+            });
+
+            $('#printToPdf').on('click', function() {
+                var start = $('#start').val();
+                var end = $('#end').val();
+                if(start > end) {
+                    toastr.error('Invalid Dates');
+                    return false;
+                }
+                toastr.info("Processing your request");
+                var url = "{{ url('manager/dashboard/scheduler/printToPdf') }}";
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: {
+                        start : start,
+                        end : end
+                    },
+                    success: function (result) {
+                        toastr.info("Generating PDF");
+                        setTimeout(() => {
+                            toastr.success("<br /><br /><button type='button' id='confirmationRevertYes' class='btn clear'>view</button>",'Click to view pdf',
+                            {
+                                closeButton: false,
+                                allowHtml: true,
+                                onShown: function (toast) {
+                                    $("#confirmationRevertYes").click(function(){
+                                        window.open("{{ asset('storage/schedule') }} /"+result.file, '_blank');
+                                    });
+                                    }
+                            });
+                        }, 2000);
+                    },
+                });
+            });
             
             $('a.profile').on('click', function(){
                 let id = $(this).siblings('input').val();
@@ -505,7 +578,7 @@
                     dataType: 'json',
                     contentType: 'application/json; charset=utf-8',
                     success: function (result) {
-                        console.log(result.schedule);
+                        console.log(result);
                         $('.modal .modal-header').html('');
                         $('.modal .modal-body').html('');
                         $('.modal .modal-header').html(`
@@ -522,7 +595,7 @@
                                             <div class="card-body">
                                                 <div class="author text-center">
                                                     <a href="#">
-                                                        <img class="avatar border-gray" src="{{ asset('storage/avatar/') }}/`+result.data.profile.avatar+`" alt="Avatar" width="70" height="70">
+                                                        <img class="avatar border-gray" src="{{ asset('storage/images/') }}/`+result.data.profile.avatar+`" alt="Avatar" width="70" height="70">
                                                         <h5 class="name">`+result.data.name+`</h5>
                                                     </a>
                                                     <p class="text-black">`+check(result.data.email)+`</p>
@@ -642,7 +715,7 @@
                         data += `  
                             <tr>
                                 <td>`+x[0]+`</td>
-                                <td>`+x[1]+`</td>
+                                <td>`+convert(x[1])+`</td>
                             </tr>     
                         `;
                     }
@@ -660,6 +733,22 @@
                     </div>
                 `;
                 return data;
+            }
+            
+            function convert(str){
+                var x = str.split('-');
+                var y = x[0].split(':');
+                var z = y[0] + 'AM';
+                var t = x[1].split(':');
+                var w = t[0] + 'AM';
+                if(parseInt(y[0]) > 12){
+                    z = Math.abs(12 - y[0]) + 'PM';
+                } 
+                if(parseInt(t[0]) > 12){
+                    w = Math.abs(12 - t[0]) + 'PM';
+                }
+
+                return z +' - '+ w;
             }
             function getEvaluation(evaluations){ 
                 var data = '';
@@ -770,7 +859,7 @@
                                         <div class="card">
                                             
                                             <div class="card-body">
-                                                <form method="POST" action="{{ url('/dashboard/employee/`+id+`/evaluation_results') }}">
+                                                <form method="POST" action="{{ url('manager/dashboard/employee/`+id+`/evaluation_results') }}">
                                                 @csrf
                                                 <div class="container-fluid text-default">
                                                     <div class="row">
@@ -900,23 +989,7 @@
                     success: function (result) {
                         console.log("HMM");
                         if (yes){
-                            toastr.info("Generating PDF");
-                            console.log(result);
-                            
-                            setTimeout(() => {
-                                toastr.success('Schedule Saved!');
-                                toastr.success("<br /><br /><button type='button' id='confirmationRevertYes' class='btn clear'>view</button>",'Click to view pdf',
-                                {
-                                    closeButton: false,
-                                    allowHtml: true,
-                                    onShown: function (toast) {
-                                        $("#confirmationRevertYes").click(function(){
-                                            window.open("{{ asset('storage/schedule') }} /"+result.file, '_blank');
-                                        });
-                                        }
-                                });
-                            }, 2000);
-                            
+                            toastr.success('Schedule Saved!');
                         }
                     },
                 });

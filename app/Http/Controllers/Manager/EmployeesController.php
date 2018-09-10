@@ -4,10 +4,14 @@ namespace App\Http\Controllers\Manager;
 
 use App\Employee;
 use PasswordMaker;
+use App\EvaluationFile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\EmployeeRequest;
+use App\Http\Resources\EmployeeResource;
+use App\Http\Resources\ScheduleResource;
+use App\Http\Resources\EvaluationCollection;
 
 class EmployeesController extends Controller
 {
@@ -37,6 +41,24 @@ class EmployeesController extends Controller
         }
 
         return redirect()->back()->with('error', 'Error Adding');
+    }
+
+    public function show($id)
+    {
+        $employee = Employee::where('id', $id)->first();
+        $evaluation = EvaluationFile::all()->where('emp_id', $id)->sortByDesc('id');   
+        if($employee) {
+            return response()->json([
+                'success' => true,
+                'data' => new EmployeeResource($employee),
+                'evaluation' => new EvaluationCollection($evaluation),
+                'schedule' => new ScheduleResource($employee->schedule)
+            ]);
+        }
+         return response()->json([
+            'success' => false,
+            'data' => "Cant retrieve information try again."
+        ]);
     }
 
     public function update_status(Request $request)

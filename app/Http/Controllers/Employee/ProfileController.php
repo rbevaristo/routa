@@ -1,37 +1,35 @@
 <?php
 
-namespace App\Http\Controllers\Manager;
+namespace App\Http\Controllers\Employee;
 
-use App\Manager;
+use App\Employee;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ManagerProfileRequest;
+use App\Http\Requests\EmployeeProfileRequest;
 
 class ProfileController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth:manager');
+        $this->middleware('auth:employee');
     }
 
-    public function update(ManagerProfileRequest $request)
+    public function update(EmployeeProfileRequest $request)
     {
         // Update User's Name
-        if(Manager::where('email', $request->email)->first() && auth()->user()->email != $request->email){
+        if(Employee::where('email', $request->email)->first() && auth()->user()->email != $request->email){
             return redirect()->back()->with('error', 'Email already exist');
         }
-        
-        $user = auth()->user(); 
-        $user->update([
-            'email' => $request->email
-        ]);
-        
+        $user = auth()->user();
+        $user->update(['email' => $request->email]);
+
         // Update User's Profile
         $profile = auth()->user()->profile;
         $profile->avatar = $request->hasFile('file') ? $this->upload($request) : auth()->user()->profile->avatar;
         $profile->gender = $request->gender;
         $profile->birthdate = $request->birthdate;
         $profile->contact = $request->contact_number;
+        $profile->gender = $request->gender;
         $profile->save();
 
         // Update User's Address
@@ -50,11 +48,6 @@ class ProfileController extends Controller
         
     }
 
-    /**
-     * Modify the name of the image by adding current time
-     * then uploading the image to the storage
-     * @return string
-     */
     public function upload(Request $request) 
     {
 

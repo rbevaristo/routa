@@ -86,4 +86,8 @@ class Manager extends Authenticatable
     public function resets() {
         return $this->hasMany('App\EmployeePasswordReset', 'user_id');
     }
+
+    public function user_requests() {
+        return $this->hasMany('App\UserRequest', 'user_id');
+    }
 }

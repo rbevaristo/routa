@@ -90,25 +90,33 @@
                                         @endif
                                     </span>
                                     <span class="float-right">
-                                        <input type="checkbox" data-toggle="toggle" data-size="small" value="{{ $manager->id }}" {{ ($manager->active) ? 'checked' : '' }}>
+                                        <input type="checkbox" class="act" data-toggle="toggle" data-size="small" value="{{ $manager->id }}" {{ ($manager->active) ? 'checked' : '' }}>
                                     </span>
                                 </div>
                                 <div id="section{{ $manager->id }}ContentId" class="collapse in" role="tabpanel" aria-labelledby="section1HeaderId">
                                     <div class="card-body">
                                         <div class="row small">
-                                            <div class="col-md-6">
+                                            <div class="col-md-6" style="height: 300px; overflow-y: auto;">
                                                 <div class="list-group">
                                                     <div class="list-group-item active">
                                                         Employees
+                                                        <span class="float-right dropdown">
+                                                            <a href="#" class="text-white dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                                <i class="fa fa-gear"></i>
+                                                            </a>
+                                                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                                                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#myModal2">Transfer</a>
+                                                            </div>
+                                                        </span>
                                                     </div>
                                                 @if(count($manager->employees) > 0)
-                                                    @foreach($manager->employees as $employee)
+                                                    @foreach($manager->employees->sortBy('lastname')->sortBy('position_id') as $employee)
                                                     <div class="list-group-item">
+                                                    <input type="checkbox" class="emp" id="{{ $employee->id }}">
                                                     <img class="avatar border-gray" src="{{ asset('storage/images/') }}/{{ $employee->profile->avatar }}" alt="Avatar" width="20" height="20">
-                                                    {{ $employee->firstname }} {{ $employee->lastname }}
+                                                    {{ $employee->firstname }} {{ $employee->lastname }} <small>({{ $employee->position->name }})</small>
                                                     <span>
-                                                        <a href="#"><i class="fa fa-eye" data-toggle="tooltip" data-placement="top" title="View"></i></a>
-                                                        <a href="#"><i class="fa fa-bar-chart" data-toggle="tooltip" data-placement="top" title="Evaluate"></i></a>
+                                                        <a href="#myModal" class="eprofile" data-toggle="modal" role="button" id="{{ $employee->id }}"><i class="fa fa-eye" data-toggle="tooltip" data-placement="top" title="View"></i></a>
                                                     </span>
                                                     </div>
                                                     @endforeach
@@ -119,11 +127,27 @@
                                                 @endif
                                                 </div>
                                             </div>
-                                            <div class="col-md-6">
+                                            <div class="col-md-6" style="height: 300px; overflow-y: auto;">
                                                 <div class="list-group">
                                                     <div class="list-group-item bg-warning">
                                                         Schedules
                                                     </div>
+                                                    @if(count($manager->schedule_files) > 0)
+                                                        @foreach($manager->schedule_files->sortByDesc('created_at') as $files)
+                                                        <div class="list-group-item">
+                                                            <a href="{{ asset('storage/schedule/') }}/{{ $files->filename }}" target="_blank">
+                                                                {{ $files->filename }}
+                                                            </a>
+                                                            <span class="float-right">
+                                                                {{ date('F d, Y', strtotime($files->created_at)) }}
+                                                            </span>
+                                                        </div>
+                                                        @endforeach
+                                                    @else 
+                                                    <div class="list-group-item">
+                                                        No Files
+                                                    </div>
+                                                    @endif
                                                 </div>
                                             </div>
                                         </div>
@@ -222,37 +246,6 @@
                     </div>
                 </div>
             </div>
-            <div class="text-center"><i>or</i></div>
-            <div class="modal-footer">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="alert alert-info">
-                            <small>
-                                To add employee using csv file upload. The following columns are required. Details enclosed with () are not needed, details only in Capitalize Letters.
-                                <ul>
-                                    <li><strong class="text-primary">ID</strong> (employee id, must be atleast 5 characters)</li>
-                                    <li><strong class="text-primary">FIRSTNAME</strong></li>
-                                    <li><strong class="text-primary">LASTNAME</strong></li>
-                                    <li><strong class="text-primary">EMAIL</strong> (optional)</li>
-                                </ul>
-                            </small>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <form action="#" method="POST" enctype="multipart/form-data">
-                            @csrf
-                            <div class="custom-file">
-                                <input type="file" class="custom-file-input" name="excelfile" id="excelfile" accept=".csv" required>
-                                <label class="custom-file-label" for="excelfile">Choose CSV file</label>
-                            </div>
-                            <div class="form-group float-right">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                <button type="submit" class="btn btn-primary">Upload</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </div>
@@ -269,8 +262,8 @@
                 <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body" id="result">
-
+            <div class="modal-body">
+                
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -278,7 +271,34 @@
         </div>
     </div>
 </div>
-{{-- @include('components.modal') --}}
+
+<div class="modal fade small" id="myModal2" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title " id="exampleModalLongTitle">
+                        Transfer Employee
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="result">
+                    <form>
+                        <select name="transfer" id="transfer" class="form-control">
+                            @foreach(auth()->user()->managers as $manager)
+                                <option value="{{ $manager->id }}">{{ $manager->firstname }} {{ $manager->lastname }}</option>
+                            @endforeach
+                        </select>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" id="transferBtn" class="btn btn-primary">Transfer</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 @endsection
 

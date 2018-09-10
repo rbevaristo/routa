@@ -7,7 +7,7 @@
             <div class="card">
                 <div class="card-header text-center bg-primary text-white"><strong>Login as <span class="text-success">Employee</span></strong></div>
                 <div class="card-body">
-                    <form method="POST" action="#" aria-label="{{ __('Login') }}">
+                    <form method="POST" action="{{ route('login.employee') }}" aria-label="{{ __('Login') }}">
                         @csrf
                         <div class="form-group">
                             <div class="input-group">

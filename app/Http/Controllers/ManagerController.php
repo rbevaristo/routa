@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Manager;
+use App\Employee;
 use PasswordMaker;
 use App\EvaluationFile;
 use Illuminate\Http\Request;
@@ -56,7 +57,7 @@ class ManagerController extends Controller
     public function show($id)
     {
         $user = Manager::where('id', $id)->first();
-        $evaluation = EvaluationFile::all()->where('manager_id', $id)->sortByDesc('id');   
+        $evaluation = auth()->user()->evaluation_files->where('manager_id', $id)->sortByDesc('id');   
         if($user) {
             return response()->json([
                 'data' => new EmployeeResource($user),
@@ -74,5 +75,14 @@ class ManagerController extends Controller
             return response()->json(['success' => true]);
         }
         return response()->json(['success' => false]);
+    }
+
+    public function transfer(Request $request)
+    {
+        foreach($request->values as $value){
+            Employee::find($value)->update(['manager_id' => $request->manager]);
+        }
+
+        return response()->json(['success' => true]);
     }
 }

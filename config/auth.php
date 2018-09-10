@@ -85,7 +85,7 @@ return [
             'model' => App\Manager::class,
         ],
 
-        'useemployeesrs' => [
+        'employees' => [
             'driver' => 'eloquent',
             'model' => App\Employee::class,
         ],

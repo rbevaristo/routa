@@ -17,7 +17,7 @@ class RoutesController extends Controller
 
     public function dashboard() {
         if(count(auth()->user()->employees) > 0){
-            $employs = EmployeesCollection::collection(auth()->user()->employees->where('active', 1));
+            $employs = EmployeesCollection::collection(auth()->user()->employees->where('active', 1)->sortByDesc('id'));
             $shifts = auth()->user()->shifts;
             $required_shifts = auth()->user()->required_shifts;
             $settings = [
@@ -73,12 +73,16 @@ class RoutesController extends Controller
         return view('manager.messages');
     }
 
-    public function peformance() {
+    public function performance() {
         return view('manager.performance');
     }
 
     public function profile() {
         return view('manager.profile');
+    }
+
+    public function schedule() {
+        return view('manager.schedule');
     }
 
 }

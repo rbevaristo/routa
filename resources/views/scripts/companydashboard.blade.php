@@ -10,7 +10,7 @@
             location.reload();
         });
 
-        $('input[type="checkbox"]').on('change', function() {
+        $('input[type="checkbox"].act').on('change', function() {
             if ($(this).is(':checked')){ 
                 var url = "{{ route('manager.update') }}";
                 $.ajax({
@@ -44,6 +44,100 @@
         $('a.profile').on('click', function(){
             let id = $(this).attr('id');
             var url = "{{ url('/dashboard/manager/') }}"+"/"+id;
+            $.ajax({
+                url: url,
+                type: 'GET',
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                success: function (result) {
+                    $('.modal .modal-header').html('');
+                    $('.modal .modal-body').html('');
+                    $('.modal .modal-header').html(`
+                        Employee Profile
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    `);
+                    $('.modal .modal-body').html(
+                        `
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="author text-center">
+                                                <a href="#">
+                                                    <img class="avatar border-gray" src="{{ asset('storage/images/') }}/`+result.data.profile.avatar+`" alt="Avatar" width="70" height="70">
+                                                    <h5 class="name">`+result.data.name+`</h5>
+                                                </a>
+                                                <p class="text-black">`+check(result.data.email)+`</p>
+                                                <p class="text-black">`+result.data.username+`</p>                                  
+                                                <p class="text-black">`+result.data.position+`</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="card">
+                                        <div class="card-header bg-primary text-white">Personal Information</div>
+                                        <div class="card-body">
+                                            <table class="table">
+                                                <tbody>
+                                                    <tr>
+                                                        <td>Gender</td>
+                                                        <td>
+                                                            `+checkGender(result.data.profile.gender)+`
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Birthday</td>
+                                                        <td>
+                                                            `+check(result.data.profile.birthdate)+`
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Contact</td>
+                                                        <td>
+                                                            `+check(result.data.profile.contact)+`
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Address</td>
+                                                        <td>
+                                                            `+check(result.data.address.number)+`
+                                                            `+check(result.data.address.street)+`
+                                                            `+check(result.data.address.city)+`
+                                                            `+check(result.data.address.state)+`
+                                                            `+check(result.data.address.zip)+`
+                                                            `+check(result.data.address.country)+`
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12" id="evaluation_files">
+                                    <div class="card">
+                                        <div class="card-header bg-primary text-white">Evaluation</div>
+                                        <div class="card-body" style="height: 300px; overflow-y: auto;">
+                                            <div class="row text-center">
+                                                <p>Evaluations are inactive to the employees, click the checkbox to activate and it will be visible to the employees.</p>    
+                                            </div>
+                                            <hr>
+                                            `+getEvaluation(result.evaluation)+`
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `
+                    );
+                },
+            });
+        });
+
+        $('a.eprofile').on('click', function(){
+            let id = $(this).attr('id');
+            var url = "{{ url('/dashboard/employee/') }}"+"/"+id;
             $.ajax({
                 url: url,
                 type: 'GET',
@@ -346,6 +440,37 @@
                     $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
                 });
             }
+        });
+
+        $('#transferBtn').on('click', function() {
+            var count = 0; var items = Array();
+            $('input[type="checkbox"].emp').each(function() {
+                if($(this).is(':checked')){
+                    count++;
+                    items.push($(this).attr('id'));
+                }
+            });
+
+            if(count <= 0) {
+                toastr.error('NO employee selected!');
+                return false;
+            }
+            
+            var url = "{{ url('/dashboard/transfer') }}";
+                $.ajax({
+                url: url,
+                type: 'POST',
+                data: {
+                    values: items,
+                    manager: $('#transfer').val()
+                },
+                success: function (result) {
+                    toastr.success('Employees transferred!!');
+                },
+                error: function (error) {
+
+                }
+            });
         });
     });
 </script>

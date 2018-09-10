@@ -1,7 +1,9 @@
-@extends('layouts.manager')
+@extends('layouts.employee')
+
 @section('styles')
 <link rel="stylesheet" href="{{ asset('css/components/lib/jquery-countryselector.css') }}">
 @endsection
+
 @section('content')
 <section id="user-profile">
     <div class="container-fluid">
@@ -13,8 +15,7 @@
                             <img class="avatar border-gray" src="{{ asset('storage/images/') }}/{{ auth()->user()->profile->avatar }}" alt="Avatar">
                             <h5 class="text-primary">{{ Helper::name() }}</h5>
                             <p> <small>{{ auth()->user()->email }} </small></p>
-                            <p class="text-primary">{{ auth()->user()->username }}</p>
-                            <p> <strong>{{ auth()->user()->role->name}} </strong></p>
+                            <p> <strong>{{ auth()->user()->position->name}} </strong></p>
                         </div>
                     </div>
                 </div>
@@ -25,7 +26,7 @@
                         Edit Profile
                     </div>
                     <div class="card-body">
-                    <form action="{{ route('manager.profile.update') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('employee.profile.update') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="row">
                             <div class="col-md-12">
@@ -81,7 +82,7 @@
                                         <label class="custom-control-label" for="male"> <i class="fa fa-male"></i> Male </label>
                                     </div>
                                     <div class="custom-control custom-radio custom-control-inline">
-                                        <input type="radio" id="female" name="gender" class="custom-control-input"  {{ auth()->user()->profile->gender == null ? '': auth()->user()->profile->gender == 0 ? 'checked' : '' }} value="0">
+                                        <input type="radio" id="female" name="gender" class="custom-control-input" {{ auth()->user()->profile->gender == null ? '': auth()->user()->profile->gender == 1 ? '' : 'checked' }} value="0">
                                         <label class="custom-control-label" for="female"> <i class="fa fa-female"></i> Female</label>
                                     </div>
                                 </div>
@@ -95,7 +96,7 @@
                                         <div class="input-group-prepend">
                                             <div class="input-group-text"><i class="fa fa-birthday-cake"></i></div>
                                         </div>
-                                        <input type="date" class="form-control" id="birthdate" name="birthdate" value="{{ auth()->user()->profile->birthdate }}" placeholder="Birthdate" required>
+                                        <input type="date" class="form-control" id="birthdate" name="birthdate" value="{{ auth()->user()->profile->birthdate }}" placeholder="Birthdate">
                                     </div>
                                 </div>
                             </div>
@@ -116,7 +117,7 @@
                                 <h3>Address</h3>
                             </div>
                         </div>
-                       <div class="row">
+                        <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <div class="input-group">
@@ -199,14 +200,13 @@
 @endsection
 
 @section('scripts')
-    <script src="{{ asset('js/components/lib/jquery.countrySelector.js') }}"></script>
-    <script>
-        $(document).ready(() => {
-            $('.custom-file-input').on('change', function() { 
-                let fileName = $(this).val().split('\\').pop(); 
-                $(this).next('.custom-file-label').addClass("selected").html(fileName); 
-            });
+<script src="{{ asset('js/components/lib/jquery.countrySelector.js') }}"></script>
+<script>
+    $(document).ready(() => {
+        $('.custom-file-input').on('change', function() { 
+            let fileName = $(this).val().split('\\').pop(); 
+            $(this).next('.custom-file-label').addClass("selected").html(fileName); 
         });
-        
-    </script>
+    });    
+</script>
 @endsection
