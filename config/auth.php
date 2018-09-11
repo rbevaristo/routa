@@ -52,8 +52,12 @@ return [
         ],
 
         'api' => [
-            'driver' => 'token',
-            'provider' => 'users',
+            'driver' => 'jwt',
+            'provider' => 'managers',
+        ],
+        'api2' => [
+            'driver' => 'jwt',
+            'provider' => 'employees',
         ],
     ],
 

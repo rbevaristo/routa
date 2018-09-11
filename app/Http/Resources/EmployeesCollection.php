@@ -21,7 +21,7 @@ class EmployeesCollection extends Resource
             'lastname' => $this->lastname,
             'email' => $this->email,
             'position' => $this->position->name,
-            'avatar' => 'http://localhost/rota/public/storage/images/'.$this->profile->avatar,
+            'avatar' => 'http://localhost/routa/public/storage/images/'.$this->profile->avatar,
             'gender' => $this->gender($this->profile->gender),
             'birthdate' => $this->profile->birthdate,
             'age' => $this->age($this->profile->birthdate),
